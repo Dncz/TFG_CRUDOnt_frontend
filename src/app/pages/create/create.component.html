@@ -1,0 +1,138 @@
+<div class="container-fluid pb-3">
+  <div class="row mt-5">
+    <div class="col">
+
+      <!-- <shared-pagination (pageChange)="onPageChange($event)"></shared-pagination> -->
+      <!-- TODO: agregar paginación y la creación de formularios para cada página... -->
+      <shared-pagination></shared-pagination>
+
+      <h2>Reactivos: <small> Dinámicos </small></h2>
+      <hr>
+
+      <form [formGroup]="ClassForm" (ngSubmit)="onSubmit()" autocomplete="off">
+
+          <!-- Nombre -->
+          <div class="mb-3 row">
+              <label class="col-sm-3 col-form-label">Nombre</label>
+              <div class="col-sm-9">
+                  <input class="form-control"
+                  formControlName="nameClass"
+                        placeholder="Nombre de la clase">
+                  <span class="form-text text-danger">
+                        error message
+                  </span>
+              </div>
+          </div>
+
+          <!-- Agregar Favorito -->
+          <div class="mb-3 row">
+              <label class="col-sm-3 col-form-label">Agregar</label>
+              <div class="col-sm-9">
+
+                  <div class="input-group">
+                      <input class="form-control"
+                            placeholder="Agregar favorito">
+
+
+                      <button class="btn btn-outline-primary"
+                              type="button">
+                          Agregar favorito
+                      </button>
+                  </div>
+              </div>
+          </div>
+
+
+          <!-- Lista de Juegos Favoritos -->
+          <div class="mb-3 row">
+              <label class="col-sm-3 col-form-label">Favoritos</label>
+              <div class="col-sm-9" formArrayName="propertiesArray">
+
+                  <div class="mb-1" *ngFor="let property of get_properties().controls; let i = index">
+
+                      <div class="input-group">
+                          <input [formControlName]="i"
+                          class="form-control">
+
+                          <button class="btn btn-outline-danger"
+                                  type="button">
+                            Eliminar
+                        </button>
+                      </div>
+                      <span class="form-text text-danger">
+                        Este campo es requerido
+                      </span>
+
+                  </div>
+
+              </div>
+          </div>
+
+
+
+          <div class="row">
+              <div class="col-sm-12">
+                  <button type="submit"
+                          class="btn btn-primary float-end"
+                          >
+                          <!-- [disabled]="myForm.invalid" -->
+                      Guardar
+                  </button>
+              </div>
+          </div>
+
+
+      </form>
+
+      <hr>
+      <h3>Form test for ontology</h3>
+      <hr>
+
+      <div class="mb-3 row" *ngFor="let className of get_classNameArray()">
+      <!-- <div class="mb-3" *ngFor="let form of getFormsForCurrentPage()">
+
+        <form [formGroup]="form" autocomplete="off"> -->
+
+        <form [formGroup]="mockDataForm" autocomplete="off">
+
+          <div class="alert alert-secondary" role="alert">
+            <h4 class="alert-heading"> {{ className }} </h4>
+            <p> {{ get_comment(className)}} </p>
+          </div>
+
+            <!-- Aqui irán los inputs de las propiedades de las clases -->
+            <div class="mb-1" *ngFor="let property of get_dataTypeProperties(className)">
+
+              <div class="input-group">
+                <label class="col-sm-3 col-form-label">{{ property }}</label><br>
+                <input class="form-control" type="text" placeholder="Property name">
+              </div>
+
+            </div>
+          <!-- </div> -->
+          <button type="submit"
+          class="btn btn-primary float-end">Submit</button>
+        </form>
+
+      </div>
+
+
+
+
+      <span>Valid</span>
+      <pre>{{ 'object'  }}</pre>
+      <br>
+
+      <span>Value</span>
+      <pre>{{ 'object'  }}</pre>
+      <br>
+
+      <span>Agregar Juego</span>
+      <pre>{{ 'object'  }}</pre>
+      <pre>{{ 'object' }}</pre>
+
+
+        </div>
+      </div>
+</div>
+
