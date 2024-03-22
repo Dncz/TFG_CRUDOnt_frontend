@@ -3,24 +3,23 @@ import { CommonModule } from '@angular/common';
 import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
-import { PaginationComponent } from './components/pagination/pagination.component';
+import { MaterialModule } from '../material/material.module';
 
 
 
 @NgModule({
   declarations: [
     SideMenuComponent,
-    HeaderComponent,
-    PaginationComponent
+    HeaderComponent
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    // MaterialModule
   ],
   exports: [
     SideMenuComponent,
-    HeaderComponent,
-    PaginationComponent
+    HeaderComponent
   ],
   // bootstrap: [HeaderComponent]
 })

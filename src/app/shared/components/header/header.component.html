@@ -12,9 +12,9 @@
         <li><a routerLink="/appOntology/delete" class="nav-link px-2 link-primary" [routerLinkActive]="['active', 'link-body-emphasis']">Delete</a></li>
       </ul>
 
-      <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+      <!-- <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
         <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
-      </form>
+      </form> -->
 
       <!-- TODO: hacer funcionar que el dropdown funciones :/ -->
       <div class="dropdown text-end">
@@ -31,4 +31,25 @@
       </div>
     </div>
   </div>
+  <!-- <mat-sidenav-container>
+    <mat-sidenav #sidenav mode="push" [ngStyle]="{width: '250px'}">
+      <mat-toolbar color="warn">
+        <span>Menú</span>
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="sidenav.toggle()">
+          <mat-icon>menú</mat-icon>
+        </button>
+      </mat-toolbar>
+    </mat-sidenav>
+
+
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>
+          menu
+        </mat-icon>
+      </button>
+    </mat-toolbar>
+
+  </mat-sidenav-container> -->
 </header>
