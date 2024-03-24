@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Class } from '../../interface/classes.interface';
 import { DataPropertiesClass } from '../../interface/data-properties.interface';
 import { ObjectProperty } from '../../interface/object-properties.interface';
-import { DataOntology, Intance } from '../../interface/data-ontology.interface';
+import { Intance } from '../../interface/data-ontology.interface';
 
 
 @Component({
@@ -23,9 +23,10 @@ export class CreateComponent implements OnInit {
   ngOnInit(): void {
     // this.loadClasses();
     this.loadDataOntology();
+    // this.formOntology.reset();
   }
 
-  public dataOntology: DataOntology[] = [];
+  // public dataOntology: DataOntology[] = [];
   private loadDataOntology(): void {
     this.loadClasses();
   }
@@ -155,7 +156,9 @@ export class CreateComponent implements OnInit {
   }
 
   public formOntology: FormGroup = this.fb.group({
-    className: ['', [Validators.required, Validators.minLength(10)]],
+    nameInstance: ['', [Validators.required,
+                        Validators.minLength(3),
+                        Validators.pattern('^[A-Z][A-Za-z0-9]*(_[A-Z][A-Za-z0-9]*)*$')]],
   });
 
   isValidFieldInArray(formArray: FormArray, index: number) {
@@ -168,9 +171,39 @@ export class CreateComponent implements OnInit {
 
   }
 
-  // onSubmit(): void {
-  //   console.log(this.ClassForm.value);
-  //   this.ClassForm.reset();
-  // }
+  public isValidField(field: string): boolean | null {
+    return this.formOntology.controls[field].errors && this.formOntology.controls[field].touched;
+  }
+
+  public getFieldError(field: string): string | null {
+    if (!this.formOntology.controls[field].errors) {
+      return null;
+    }
+
+    const errors = this.formOntology.controls[field].errors || {};
+
+    for (const key of Object.keys(errors)) {
+      switch (key) {
+        case 'required':
+          return 'This field is required';
+        case 'pattern':
+          return 'Invalid pattern. The field must start with a capital letter and contain only letters and numbers separated by underscores';
+        case 'minlength':
+          return `The field must have at least ${ errors['minlength'].requiredLength } characters`;
+        default:
+          return 'Unknown error';
+      }
+    }
+    return null;
+  }
+
+  onSubmit(): void {
+    if (this.formOntology.invalid) {
+      this.formOntology.markAllAsTouched();
+      return;
+    }
+
+    console.log(this.formOntology.value);
+  }
 
 }

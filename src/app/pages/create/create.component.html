@@ -16,7 +16,7 @@
       <div class="mb-3" *ngFor="let className of getClassesName()">
         <div *ngIf="activeForm === className">
 
-          <form [formGroup]="formOntology" autocomplete="off">
+          <form [formGroup]="formOntology" autocomplete="off" (ngSubmit)="onSubmit()">
 
             <div class="alert alert-secondary" role="alert">
               <h4 class="alert-heading"> {{ splitCamelCase(className) }} </h4>
@@ -26,7 +26,11 @@
             <div class="input-group mb-1">
               <label class="col-sm-3 col-form-label"> Instance name </label>
               <div class="col-sm-9">
-                <input class="form-control" type="text" placeholder="Instance name" formControlName="className">
+                <input class="form-control" type="text" placeholder="Instance name" formControlName="nameInstance">
+                <span *ngIf="isValidField('nameInstance')"
+                  class="form-text text-danger">
+                  {{ getFieldError('nameInstance')}}
+                </span>
               </div>
             </div>
 
@@ -75,16 +79,43 @@
         </div>
       </div>
 
-      <!-- TODO: configurar los servicios para que funcione ya con los datos del backend -->
       <!-- <div *ngFor="let dataOntology of this.dataOntology">
         <p> {{ dataOntology | json }} </p>
       </div> -->
-      <div >
+      <!-- <div >
         <p> {{ this.intances | json}} </p>
-      </div>
+      </div> -->
 
         </div>
       </div>
 
 </div>
 
+<div class="row">
+  <div class="col">
+
+      <span>Valid</span>
+      <pre>{{ formOntology.valid | json }}</pre>
+
+      <span>Pristine</span>
+      <pre>{{ formOntology.pristine| json }}</pre>
+
+      <span>Touched</span>
+      <pre>{{ formOntology.touched| json }}</pre>
+
+      <span>Value</span>
+      <pre>{{ formOntology.value| json }}</pre>
+
+      <span>Name</span>
+      <pre>{{ formOntology.controls['nameInstance'].value | json }}</pre>
+
+      <span>Name - Errors</span>
+      <pre>{{ formOntology.controls['nameInstance'].errors | json }}</pre>
+
+      <!-- <span>Producto</span>
+      <pre>{{ formOntology.controls['name'].value | json }}</pre>
+
+      <span>Producto</span>
+      <pre>{{ formOntology.controls['name'].errors | json }}</pre> -->
+  </div>
+</div>
