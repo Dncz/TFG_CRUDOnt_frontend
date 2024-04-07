@@ -24,25 +24,52 @@
             </div>
 
             <div class="input-group mb-1">
-              <label class="col-sm-3 col-form-label"> Instance name </label>
+              <label class="col-sm-3 col-form-label"> Label </label>
               <div class="col-sm-9">
-                <input class="form-control" type="text" placeholder="Instance name" formControlName="nameInstance">
-                <span *ngIf="isValidField('nameInstance')"
+                <!-- TODO: validación de repetición del nombre -->
+                <input class="form-control" type="text" placeholder="Label name" formControlName="labelName">
+                <span *ngIf="isValidField('labelName')"
                   class="form-text text-danger">
-                  {{ getFieldError('nameInstance')}}
+                   {{ getFieldError('labelName')}}
                 </span>
               </div>
             </div>
 
-            <!-- Aquí irán los inputs de las propiedades de las clases -->
-            <div *ngFor="let property of getDataProperties(className)" class="mb-1">
+            <!-- TODO: validación para cada dataProperty -->
+            <div formArrayName="dataProperties">
+              <div *ngFor="let control of dataPropertiesFormArray.controls; let i = index" class="mb-1">
+              <!-- <div *ngFor="let restricion of getRestrictionsDataProperties(); let i = index" class="mb-1"> -->
+                <div class="input-group">
+                  <label class="col-sm-3 col-form-label">
+                    {{ getDataProperties(className)[i].replace('has', '') }}
+                    <!-- {{ restricion.dataPropertyName.replace('has','') }} -->
+                  </label>
+
+                  <div class="col-sm-9">
+                    <div class="input-group">
+                      <input [formControlName]="i" class="form-control" type="text" placeholder="Something" >
+                      <button *ngIf="showPlusIconForDataPropertyTypeSomeValuesFrom(getDataProperties(className)[i])" mat-mini-fab color="accent" type="button">
+                        <mat-icon> plus_one </mat-icon>
+                      </button>
+                    </div>
+
+                    <span *ngIf="isValidFieldInArray(dataPropertiesFormArray, i)" class="form-text text-danger">
+                      {{ getFieldErrorArray(i) }}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- <div *ngFor="let property of getDataProperties(className)" class="mb-1">
               <div class="input-group">
-                <label class="col-sm-3 col-form-label">{{ property }}</label>
+                <label class="col-sm-3 col-form-label">{{ property.replace('has', '') }}</label>
                 <div class="col-sm-9">
                   <input class="form-control" type="text" placeholder="Property name">
                 </div>
               </div>
-            </div>
+            </div> -->
 
               <button type="button" (click)="view_objectProperties()" class="btn btn-success mb-6">Add Object Property +</button>
               <div *ngIf="showObjectProperties">
@@ -61,7 +88,8 @@
                 <h3> Instances of {{ this.getRangeName(className) }} and subclases </h3>
                 <mat-selection-list>
                   <mat-list-option *ngFor="let instance of getIntances(); trackBy: track" color="primary">
-                      <span matListItemTitle> {{ instance.name }} </span>
+                      <!-- <span matListItemTitle> {{ instance.name }} </span> -->
+                      <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
                       <span matListItemLine>
                         {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
                       </span>
@@ -106,16 +134,23 @@
       <span>Value</span>
       <pre>{{ formOntology.value| json }}</pre>
 
-      <span>Name</span>
+      <!-- <span>Name</span>
       <pre>{{ formOntology.controls['nameInstance'].value | json }}</pre>
 
       <span>Name - Errors</span>
-      <pre>{{ formOntology.controls['nameInstance'].errors | json }}</pre>
+      <pre>{{ formOntology.controls['nameInstance'].errors | json }}</pre> -->
 
-      <!-- <span>Producto</span>
-      <pre>{{ formOntology.controls['name'].value | json }}</pre>
+      <span>Data Properties</span>
+      <pre>{{ formOntology.controls['dataProperties'].value | json }}</pre>
 
-      <span>Producto</span>
-      <pre>{{ formOntology.controls['name'].errors | json }}</pre> -->
+      <!-- <span>Data Properties - Errors</span>
+      <pre>{{ formOntology.controls['dataProperties'].errors | json }}</pre> -->
+      <span>Data Properties - Errors</span>
+      <pre>
+        <ng-container *ngFor="let control of dataPropertiesFormArray.controls">
+          {{ control.errors | json }}
+        </ng-container>
+      </pre>
+
   </div>
 </div>

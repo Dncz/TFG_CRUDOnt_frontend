@@ -1,4 +1,4 @@
-import { Intance } from './../interface/data-ontology.interface';
+import { Intance, DataProperty, Restriction, DataPropertyTest } from './../interface/data-ontology.interface';
 import { DataPropertiesClass } from './../interface/data-properties.interface';
 import { Injectable } from '@angular/core';
 // import { v4 as uuid } from 'uuid';  // esto es para generar un id unico
@@ -50,11 +50,40 @@ export class CreateService {
     );
   }
 
-  public getDataPropertiesClass(): Observable<DataPropertiesClass[]> {
-    const observables: Observable<DataPropertiesClass>[] = [];
+  // public getDataPropertiesClass(): Observable<DataPropertiesClass[]> {
+  //   const observables: Observable<DataPropertiesClass>[] = [];
+  //   this._classNames.forEach(className => {
+  //     observables.push(this.http.get<DataPropertiesClass>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
+  //       map(data => this.mapDataPropertiesClass(data))
+  //     ));
+  //   });
+  //   return forkJoin(observables);
+  // }
+
+  public getDataProperties(className: string): Observable<DataProperty[]> {
+    return this.http.get<DataProperty[]>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
+      map(data => {
+        return data.map(item => ({
+          name: item.name,
+          IRI: item.IRI
+        }));
+      })
+    );
+  }
+
+  public mapDataPropertiesTest(data: any): DataPropertyTest {
+    return {
+      className: data.className,
+      IRIs: data.IRIs.split(/,\s*/),
+      names: data.names.split(/,\s*/)
+    };
+  }
+
+  public getDataPropertiesTest(): Observable<DataPropertyTest[]> {
+    const observables: Observable<DataPropertyTest>[] = [];
     this._classNames.forEach(className => {
-      observables.push(this.http.get<DataPropertiesClass>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
-        map(data => this.mapDataPropertiesClass(data))
+      observables.push(this.http.get<DataPropertyTest>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
+        map(data => this.mapDataPropertiesTest(data))
       ));
     });
     return forkJoin(observables);
@@ -79,8 +108,22 @@ export class CreateService {
         return data.map(item => ({
           IRI: item.IRI,
           name: item.name,
-          description: item.description
+          description: item.description,
+          label: item.label
         }));
       })    );
+  }
+
+  public getRestrictions(className: string, dataPropertyName: string): Observable<Restriction[]> {
+    return this.http.get<Restriction[]>(`${environment.apiUrl}/restrictionDataProperty/${className}/${dataPropertyName}`).pipe(
+      map(data => {
+        return data.map(item => ({
+          typeIRI: item.typeIRI,
+          typeName: item.typeName,
+          valueIRI: item.valueIRI
+        }));
+      })
+    );
+
   }
 }

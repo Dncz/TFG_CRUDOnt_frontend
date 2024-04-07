@@ -1,50 +1,38 @@
-
-// export interface DataProperties {
-//   name: string;
-//   restriction: [
-//   ]
-// }
+import { DataPropertiesClass } from "./data-properties.interface";
+import { ObjectProperty } from "./object-properties.interface";
 
 export interface Restriction {
-  restriction: string;
-  restrictionType: string;
-  restrictionValue: string;
-  restrictionTypeName: string;
+  typeIRI: string;
+  typeName: string;
+  valueIRI: string;
+}
+
+export interface CreateInstance {
+  name: string;
+  description?: string;
+  objectProperties: ObjectProperty[];
+  dataProperties: DataPropertiesClass[];
 }
 
 export interface DataProperty {
   name: string;
   IRI: string;
-  restrictionTypeName: string;
-  restrictionValue?: string;
 }
 
-export interface ObjectProperty {
-  name: string;
-  IRI: string;
-  restrictionTypeName: string;
-  restrictionValue: string;
-}
-
-export interface DataOntology {
-  classIRI: string;
+export interface DataPropertyTest {
   className: string;
-  comment: string;
-  clasification: string;
-  dataProperties: DataProperty[];
-  objectPropertiesNames: ObjectProperty[];
+  IRIs: string[];
+  names: string[];
 }
 
-export interface Predicate {
-  objectPropertyURI: string,
-  objectPropertyName: string,
-  rangeURI: string,
-  rangeName: string
-
+export interface RestrictionCardinality {
+  dataPropertyName: string;
+  restrictions : Restriction[];
 }
 
 export interface Intance {
   IRI: string,
   name: string,
-  description: string
+  description: string,
+  label: string
 }
