@@ -36,3 +36,60 @@
   background-color: #3f4144;
   color: #fff;
 }
+
+.square-button {
+  font-size: 10px;
+  border-radius: 5px; /* Borde redondeado opcional */
+  background-color: #2C4188; /* Color de fondo del botón */
+  color: #ffffff; /* Color del texto del botón */
+  border: none; /* Quitamos el borde */
+  cursor: pointer; /* Cursor al pasar el mouse */
+  transition: box-shadow 0.3s ease, background-color 0.3s ease; /* Transición suave para la sombra y el color de fondo */
+}
+
+.square-button:hover {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19); /* Efecto de sombra al pasar el mouse */
+  background-color: #364D99; /* Cambiar ligeramente el color del botón al pasar el mouse */
+}
+
+.square-button-data-property {
+  border-radius: 5px; /* Borde redondeado opcional */
+  background-color: #2C4188; /* Color de fondo del botón */
+  color: #ffffff; /* Color del texto del botón */
+  border: none; /* Quitamos el borde */
+  cursor: pointer; /* Cursor al pasar el mouse */
+  transition: box-shadow 0.3s ease, background-color 0.3s ease; /* Transición suave para la sombra y el color de fondo */
+}
+
+.square-button-data-property:hover {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19); /* Efecto de sombra al pasar el mouse */
+  background-color: #364D99; /* Cambiar ligeramente el color del botón al pasar el mouse */
+}
+
+.square-button-delete {
+  font-size: 10px;
+  border-radius: 5px; /* Borde redondeado opcional */
+  background-color: #ffffff; /* Color de fondo del botón */
+  color: #d20000; /* Color del texto del botón */
+  border: 2px solid #d20000; /* Quitamos el borde */
+  cursor: pointer; /* Cursor al pasar el mouse */
+  transition: box-shadow 0.3s ease, background-color 0.3s ease; /* Transición suave para la sombra y el color de fondo */
+}
+
+.square-button-delete:hover {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19); /* Efecto de sombra al pasar el mouse */
+  background-color: #d20000; /* Cambiar ligeramente el color del botón al pasar el mouse */
+  color: #ffffff;
+}
+
+.mat-success {
+  background-color: #008736; /* Cambia el color de fondo a verde */
+  color: white; /* Cambia el color del texto a blanco */
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;;
+}
+
+.mat-success:hover {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 3px 10px 0 rgba(0,0,0,0.19); /* Efecto de sombra al pasar el mouse */
+  background-color: #00a341; /* Cambiar ligeramente el color del botón al pasar el mouse */
+}

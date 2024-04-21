@@ -1,7 +1,5 @@
 import { Intance, DataProperty, Restriction, DataPropertyTest } from './../interface/data-ontology.interface';
-import { DataPropertiesClass } from './../interface/data-properties.interface';
 import { Injectable } from '@angular/core';
-// import { v4 as uuid } from 'uuid';  // esto es para generar un id unico
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { Class } from '../interface/classes.interface';
@@ -28,17 +26,6 @@ export class CreateService {
     }));
   }
 
-  private mapDataPropertiesClass(data: any): DataPropertiesClass {
-    return {
-      classIRI: data.classIRI,
-      className: data.className,
-      dataTypePropertiesIRI: data.dataTypePropertiesIRI,
-      dataTypeProperties: data.dataTypeProperties.split(/,\s*/).map((property: string) => property.replace('has', '')),
-      comment: data.comment,
-      clasification: data.clasification
-    };
-  }
-
   getclass(className: string): Observable<Class> {
     return this.http.get<Class>(`${environment.apiUrl}/classes/${className}`);
   }
@@ -49,16 +36,6 @@ export class CreateService {
       map(data => this.mapToClass(data))
     );
   }
-
-  // public getDataPropertiesClass(): Observable<DataPropertiesClass[]> {
-  //   const observables: Observable<DataPropertiesClass>[] = [];
-  //   this._classNames.forEach(className => {
-  //     observables.push(this.http.get<DataPropertiesClass>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
-  //       map(data => this.mapDataPropertiesClass(data))
-  //     ));
-  //   });
-  //   return forkJoin(observables);
-  // }
 
   public getDataProperties(className: string): Observable<DataProperty[]> {
     return this.http.get<DataProperty[]>(`${environment.apiUrl}/dataProperties/${className}`).pipe(

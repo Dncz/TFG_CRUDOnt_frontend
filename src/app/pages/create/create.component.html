@@ -2,7 +2,7 @@
   <div class="row mt-5">
     <div class="col">
 
-      <h3>Form test for ontology</h3>
+      <h3>Instence Creation Form</h3>
       <hr>
 
       <div class="mb-3">
@@ -13,106 +13,128 @@
                 [class.btn-dark]="isFormActive(className)"> {{ splitCamelCase(className) }} </button>
       </div>
 
+      <shared-loading-bar *ngIf="isLoading"></shared-loading-bar>
+
       <div class="mb-3" *ngFor="let className of getClassesName()">
         <div *ngIf="activeForm === className">
 
-          <form [formGroup]="formOntology" autocomplete="off" (ngSubmit)="onSubmit()">
+          <form [formGroup]="formTestOntology" autocomplete="off" (ngSubmit)="onSubmit()">
 
-            <div class="alert alert-secondary" role="alert">
-              <h4 class="alert-heading"> {{ splitCamelCase(className) }} </h4>
-              <p> {{ get_comment(className)}} </p>
-            </div>
+            <div class="container-fluid pb-3" *ngIf="!isLoading">
 
-            <div class="input-group mb-1">
-              <label class="col-sm-3 col-form-label"> Label </label>
-              <div class="col-sm-9">
-                <!-- TODO: validación de repetición del nombre -->
-                <input class="form-control" type="text" placeholder="Label name" formControlName="labelName">
-                <span *ngIf="isValidField('labelName')"
-                  class="form-text text-danger">
-                   {{ getFieldError('labelName')}}
-                </span>
+              <div class="alert alert-secondary" role="alert">
+                <h4 class="alert-heading"> {{ splitCamelCase(className) }} </h4>
+                <p> {{ get_comment(className)}} </p>
               </div>
-            </div>
 
-            <!-- TODO: validación para cada dataProperty -->
-            <div formArrayName="dataProperties">
-              <div *ngFor="let control of dataPropertiesFormArray.controls; let i = index" class="mb-1">
-              <!-- <div *ngFor="let restricion of getRestrictionsDataProperties(); let i = index" class="mb-1"> -->
-                <div class="input-group">
-                  <label class="col-sm-3 col-form-label">
-                    {{ getDataProperties(className)[i].replace('has', '') }}
-                    <!-- {{ restricion.dataPropertyName.replace('has','') }} -->
-                  </label>
+              <div class="input-group mb-1">
+                <label class="col-sm-3 col-form-label"> Label </label>
+                <div class="col-sm-9">
+                  <!-- TODO: validación de repetición del nombre -->
+                  <input class="form-control" type="text" placeholder="Label name" formControlName="labelName">
+                  <span *ngIf="isValidField('labelName')"
+                    class="form-text text-danger">
+                     {{ getFieldError('labelName')}}
+                  </span>
+                </div>
+              </div>
 
-                  <div class="col-sm-9">
-                    <div class="input-group">
-                      <input [formControlName]="i" class="form-control" type="text" placeholder="Something" >
-                      <button *ngIf="showPlusIconForDataPropertyTypeSomeValuesFrom(getDataProperties(className)[i])" mat-mini-fab color="accent" type="button">
-                        <mat-icon> plus_one </mat-icon>
-                      </button>
+              <div *ngFor="let controlName of formTestOntology.controls | keyvalue; let i = index" class="row mb-1">
+                <ng-container *ngIf="controlName.key !== 'labelName'">
+                  <div class="input-group mb-1">
+                    <!-- <label>{{ getDataProperties(className)[i].replace('has', '') }}</label> -->
+                    <label class="col-sm-3 col-form-label">
+                      {{ controlName.key.replace('has', '') }}
+                    </label>
+
+                    <div class="col-sm-9" *ngIf="!isFormArrayControlOfFormOntology(controlName.key)">
+
+                      <div class="input-group">
+                        <input [formControlName]="controlName.key" class="form-control" type="text" placeholder="Something">
+                        <button *ngIf="ifControlKeyIsConteinedInNameOfSomeControlOfFormArray(controlName.key) && showPlusIconForDataPropertyTypeSomeValuesFrom(controlName.key)"
+                                class="btn square-button" color="primary"
+                                type="button"
+                                (click)="onAddElementToFormArray(controlName.key)">
+                          Add
+                        </button>
+                      </div>
+
+                      <span *ngIf="isValidField(controlName.key)"
+                        class="form-text text-danger">
+                        {{ getFieldError(controlName.key)}}
+                      </span>
+
                     </div>
 
-                    <span *ngIf="isValidFieldInArray(dataPropertiesFormArray, i)" class="form-text text-danger">
-                      {{ getFieldErrorArray(i) }}
-                    </span>
+                    <div class="col-sm-9" *ngIf="isFormArrayControlOfFormOntology(controlName.key)">
+                      <div [formArrayName]="controlName.key">
+                        <div class="mb-1" *ngFor="let data of getFormArrayOfFormTestOntology(controlName.key).controls; let j = index">
+
+                          <div class="input-group">
+                            <input [formControlName]="j"
+                              class="form-control"
+                              type="text"
+                              placeholder="Something FormArray">
+
+                                <button (click)="onDelElementToFormArray(controlName.key, j)"
+                                        class="square-button-delete"
+                                        type="button">
+                                  Delete
+                                </button>
+                            </div>
+
+                          <div class="input-group">
+                            <span *ngIf="isValidFieldInArrayOfFormTestOntology(controlName.key, j)" class="form-text text-danger">
+                              {{ getFieldErrorInArrayOfFormTestOntology(controlName.key, j) }}
+                            </span>
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+
                   </div>
+                </ng-container>
+              </div>
+
+                <button type="button" (click)="view_objectProperties()" class="btn square-button-data-property mb-6">Add Object Property +</button>
+                <div *ngIf="showObjectProperties">
+
+                  <mat-chip-listbox aria-label="ObjectProperties Selection">
+                    <mat-chip-option *ngFor="let property of getObjectProperties(className); let i = index"
+                                      [selected]="isSelected(i)"
+                                      (click)="toggleSelection(i, className)">
+                      {{ property.name }}
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+
                 </div>
 
-              </div>
+                <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;">
+                  <h3> Instances of {{ this.getRangeName(className) }} and subclases </h3>
+                  <mat-selection-list (selectionChange)="onSelectionChange($event)">
+                    <mat-list-option *ngFor="let instance of getIntances(); trackBy: track" color="primary" [value]="instance.name">
+                        <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
+                        <span matListItemLine>
+                          {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
+                        </span>
+                    </mat-list-option>
+                  </mat-selection-list>
+                </div>
+
+                <div class="mb-3">
+                  <button type="submit"
+                  class="btn float-end mat-success">Submit</button>
+                </div>
             </div>
 
-            <!-- <div *ngFor="let property of getDataProperties(className)" class="mb-1">
-              <div class="input-group">
-                <label class="col-sm-3 col-form-label">{{ property.replace('has', '') }}</label>
-                <div class="col-sm-9">
-                  <input class="form-control" type="text" placeholder="Property name">
-                </div>
-              </div>
-            </div> -->
-
-              <button type="button" (click)="view_objectProperties()" class="btn btn-success mb-6">Add Object Property +</button>
-              <div *ngIf="showObjectProperties">
-
-                <mat-chip-listbox aria-label="ObjectProperties Selection">
-                  <mat-chip-option *ngFor="let property of getObjectProperties(className); let i = index"
-                                    [selected]="isSelected(i)"
-                                    (click)="toggleSelection(i, className)">
-                    {{ property.name }}
-                  </mat-chip-option>
-                </mat-chip-listbox>
-
-              </div>
-
-              <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;">
-                <h3> Instances of {{ this.getRangeName(className) }} and subclases </h3>
-                <mat-selection-list>
-                  <mat-list-option *ngFor="let instance of getIntances(); trackBy: track" color="primary">
-                      <!-- <span matListItemTitle> {{ instance.name }} </span> -->
-                      <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
-                      <span matListItemLine>
-                        {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
-                      </span>
-                  </mat-list-option>
-                </mat-selection-list>
-              </div>
-
-              <div class="mb-3">
-                <button type="submit" mat-raised-button color="primary"
-                class="float-end">Submit</button>
-              </div>
 
           </form>
 
         </div>
       </div>
-
-      <!-- <div *ngFor="let dataOntology of this.dataOntology">
-        <p> {{ dataOntology | json }} </p>
-      </div> -->
-      <!-- <div >
-        <p> {{ this.intances | json}} </p>
-      </div> -->
 
         </div>
       </div>
@@ -123,25 +145,34 @@
   <div class="col">
 
       <span>Valid</span>
-      <pre>{{ formOntology.valid | json }}</pre>
+      <pre>{{ formTestOntology.valid | json }}</pre>
 
       <span>Pristine</span>
-      <pre>{{ formOntology.pristine| json }}</pre>
+      <pre>{{ formTestOntology.pristine| json }}</pre>
 
       <span>Touched</span>
-      <pre>{{ formOntology.touched| json }}</pre>
+      <pre>{{ formTestOntology.touched| json }}</pre>
 
-      <span>Value</span>
-      <pre>{{ formOntology.value| json }}</pre>
+      <!-- <span>Value</span>
+      <pre>{{ formOntology.value| json }}</pre> -->
 
+      <span>FormTest Value</span>
+      <pre>{{ formTestOntology.value | json }}</pre>
+
+      <span>FormTest- label Erros</span>
+      <pre>{{ formTestOntology.controls['labelName'].errors| json }}</pre>
+
+      <!-- <span>FormTest Value</span>
+      <pre>{{ formTestOntology.controls | json }}</pre> -->
       <!-- <span>Name</span>
       <pre>{{ formOntology.controls['nameInstance'].value | json }}</pre>
 
       <span>Name - Errors</span>
       <pre>{{ formOntology.controls['nameInstance'].errors | json }}</pre> -->
 
-      <span>Data Properties</span>
-      <pre>{{ formOntology.controls['dataProperties'].value | json }}</pre>
+      <!-- <span>Data Properties</span>
+      <pre>{{ formOntology.controls['dataProperties'].value | json }}</pre> -->
+
 
       <!-- <span>Data Properties - Errors</span>
       <pre>{{ formOntology.controls['dataProperties'].errors | json }}</pre> -->

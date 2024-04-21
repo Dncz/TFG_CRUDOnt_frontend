@@ -36,3 +36,8 @@ export interface Intance {
   description: string,
   label: string
 }
+
+export interface SelectedOption {
+  objectPropertyName: string;
+  instances: string[];
+}

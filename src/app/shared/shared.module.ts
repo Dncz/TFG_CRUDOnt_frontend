@@ -1,25 +1,27 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SideMenuComponent } from './components/side-menu/side-menu.component';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { MaterialModule } from '../material/material.module';
+import { LoadingBarComponent } from './components/loading-bar/loading-bar.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 
 @NgModule({
   declarations: [
-    SideMenuComponent,
-    HeaderComponent
+    HeaderComponent,
+    LoadingBarComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    // MaterialModule
+    MaterialModule,
+    MatProgressBarModule
   ],
   exports: [
-    SideMenuComponent,
-    HeaderComponent
+    HeaderComponent,
+    LoadingBarComponent
   ],
   // bootstrap: [HeaderComponent]
 })
