@@ -71,7 +71,7 @@ export class CreateService {
       map(data => {
         return data.map(item => ({
           IRI : item.IRI,
-          name: item.name.replace('has', ''),
+          name: item.name,
           rangeIRI: item.rangeIRI,
           rangeName: item.rangeName
         }));

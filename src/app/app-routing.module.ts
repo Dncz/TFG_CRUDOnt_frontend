@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'appOntology',
+    path: 'RaDiOW',
     loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
   },
   {
@@ -12,7 +12,7 @@ const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'appOntology',
+    redirectTo: 'RaDiOW',
   },
 ];
 

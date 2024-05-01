@@ -6,7 +6,7 @@ import { Observable, of, switchMap, tap } from 'rxjs';
 import { Class } from '../../interface/classes.interface';
 import { CreateService } from './../../service/create.service';
 import { ObjectProperty } from '../../interface/object-properties.interface';
-import { DataPropertyTest, Restriction } from './../../interface/data-ontology.interface';
+import { DataPropertyTest, Restriction, SelectedOption } from './../../interface/data-ontology.interface';
 import { Intance, RestrictionCardinality } from '../../interface/data-ontology.interface';
 
 
@@ -43,7 +43,7 @@ export class CreateComponent implements OnInit {
     return this.classes.map(c => c.className);
   }
 
-  public get_comment(className: string): string{
+  public getComment(className: string): string{
     const classData = this.classes.find(c => c.className === className);
     return classData ? classData.comment : '';
   }
@@ -161,7 +161,7 @@ export class CreateComponent implements OnInit {
       ).subscribe(() => {
         this.hideLoadingBar();
       });
-      this.intances = []; // Limpiar las instancias // TODO: no se si esto es necesario
+      this.intances = []; // Limpiar las instancias
       this.formOntology.get('nameInstance')?.setValue(''); // Limpiar el campo de nombre de instancia
     }
     this.clear();
@@ -192,31 +192,63 @@ export class CreateComponent implements OnInit {
     this.showObjectProperties = !this.showObjectProperties; // Cambia el valor booleano cuando se hace clic en el botón
   }
 
-  // TODO: crear una array par guardar los datos seleccionados de la lista de instancias
-  // osea
-  // datos a guardas = [{
-  //  objectPropertyName: string,
-  //  intances: string[],
-  // }]
+  public objectPropertiesSelected: SelectedOption[] = [];
   public selectedChipIndex: number | null = null;
   public toggleSelection(index: number, selectedClassName: string): void {
     if (this.selectedChipIndex === index) {
       this.selectedChipIndex = null; // Deseleccionar si se hace clic en el chip ya seleccionado
       this.intances = []; // Limpiar las instancias
+      this.selectedInstances = []; // Limpiar las instancias seleccionadas
     } else {
+      if (this.selectedChipIndex !== index && this.selectedInstances.length !== 0) {
+        // buscar si ya existe el nombre en el array de objectPropertiesSelected
+        const found = this.objectPropertiesSelected.find(option => option.objectPropertyName === this.objectProperies[this.selectedChipIndex!].name);
+        if (found) {
+          found.instances = this.selectedInstances;
+        } else {
+          this.saveObjectPropertiesOptions();
+        }
+        this.selectedInstances = [];
+      } else if (this.selectedChipIndex !== null && this.selectedInstances.length === 0) {
+        const foundIndex = this.objectPropertiesSelected.findIndex(option => option.objectPropertyName === this.objectProperies[this.selectedChipIndex!].name);
+        if (foundIndex !== -1) {
+          this.objectPropertiesSelected.splice(foundIndex, 1);
+        }
+      }
+
       this.selectedChipIndex = index; // Seleccionar el chip si se hace clic en él
+      this.initializeSelectedOptions(index);
       const rangeName = this.getRangeName(selectedClassName);
       if (rangeName !== 'Not found rangeName?' && rangeName !== 'Not found Predicate?') {
-        // console.log('rangeName', rangeName);
         this.loadIntances(rangeName);
       }
+    }
+  }
+
+  public initializeSelectedOptions(chipIndex: number): void {
+    const found = this.objectPropertiesSelected.find(option => option.objectPropertyName === this.objectProperies[chipIndex].name);
+    if (found) {
+      this.selectedInstances = found.instances;
+    } else {
+      this.selectedInstances = [];
+    }
+  }
+
+  public saveObjectPropertiesOptions(): void {
+    if (this.selectedChipIndex !== null && this.selectedInstances.length !== 0) {
+      this.objectPropertiesSelected.push({
+        objectPropertyName: this.objectProperies[this.selectedChipIndex].name,
+        instances: this.selectedInstances
+      });
     }
   }
 
   public selectedInstances: string[] = [];
   public onSelectionChange(event: MatSelectionListChange) {
     const selectedOptions = event.source.selectedOptions.selected.map(option => option.value);
-    this.selectedInstances = selectedOptions;
+    if (this.selectedChipIndex !== null) {
+      this.selectedInstances = selectedOptions;
+    }
   }
 
   public isSelected(index: number): boolean {
@@ -323,7 +355,7 @@ export class CreateComponent implements OnInit {
             validators.push(Validators.minLength(1));
           } else {
             validators.push(Validators.pattern('^[A-Za-z0-9 ]*$'));
-            validators.push(Validators.maxLength(10));
+            validators.push(Validators.maxLength(146));
             validators.push(Validators.minLength(1));
           }
           if (restriction.typeName === 'someValuesFrom') {
@@ -444,39 +476,6 @@ export class CreateComponent implements OnInit {
     return null;
   }
 
-  public getFieldErrorArray(i: number): string | null {
-    const control = this.dataPropertiesFormArray.at(i);
-    if (!control.errors) {
-      return null;
-    }
-
-    const errors = control.errors;
-    for (const key of Object.keys(errors)) {
-      switch (key) {
-        case 'required':
-          return 'This field is required';
-        case 'pattern':
-          const patternError = errors['pattern'];
-          if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9 ]*$') {
-            return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
-          } else if (patternError.requiredPattern === '^[0-9 ]*$') {
-            return 'Invalid pattern. The field must contain only numbers.';
-          } else if (patternError.requiredPattern === '^-?([1-9]\d*)([\.,]\d+)?$') {  // FIX: la exp está bien, pero muestra el error en el campo de texto
-            return 'Invalid pattern. The field must contain only numbers or decimal points and using dot as decimal separator.';
-          } else {
-            return 'Invalid pattern.';
-          }
-        case 'minlength':
-          return `The field must have at least ${ errors['minlength'].requiredLength } characters`;
-        case 'maxlength':
-          return `The field must have at most ${ errors['maxlength'].requiredLength } characters`;
-        default:
-          return 'Unknown error';
-      }
-    }
-    return null;
-  }
-
   public getFieldError(field: string): string | null {
     if (!this.formTestOntology.controls[field].errors) {
       return null;
@@ -512,6 +511,10 @@ export class CreateComponent implements OnInit {
 
   get dataPropertiesFormArray(): FormArray {
     return this.formOntology.get('dataProperties') as FormArray;
+  }
+
+  public removeHas(name: string): string {
+    return name.replace('has', '');
   }
 
   onSubmit(): void {

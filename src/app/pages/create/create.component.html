@@ -24,7 +24,7 @@
 
               <div class="alert alert-secondary" role="alert">
                 <h4 class="alert-heading"> {{ splitCamelCase(className) }} </h4>
-                <p> {{ get_comment(className)}} </p>
+                <p> {{ getComment(className)}} </p>
               </div>
 
               <div class="input-group mb-1">
@@ -42,9 +42,11 @@
               <div *ngFor="let controlName of formTestOntology.controls | keyvalue; let i = index" class="row mb-1">
                 <ng-container *ngIf="controlName.key !== 'labelName'">
                   <div class="input-group mb-1">
-                    <!-- <label>{{ getDataProperties(className)[i].replace('has', '') }}</label> -->
+
                     <label class="col-sm-3 col-form-label">
-                      {{ controlName.key.replace('has', '') }}
+                      <!-- {{ controlName.key.replace('has', '') }} -->
+                      <ng-container *ngIf="controlName.key.includes('Array'); else notArray">Lista de {{ removeHas(controlName.key.replace('Array', '')) }}</ng-container>
+                      <ng-template #notArray>{{ removeHas(controlName.key) }}</ng-template>
                     </label>
 
                     <div class="col-sm-9" *ngIf="!isFormArrayControlOfFormOntology(controlName.key)">
@@ -94,7 +96,6 @@
                       </div>
                     </div>
 
-
                   </div>
                 </ng-container>
               </div>
@@ -105,8 +106,9 @@
                   <mat-chip-listbox aria-label="ObjectProperties Selection">
                     <mat-chip-option *ngFor="let property of getObjectProperties(className); let i = index"
                                       [selected]="isSelected(i)"
-                                      (click)="toggleSelection(i, className)">
-                      {{ property.name }}
+                                      (click)="toggleSelection(i, className)"
+                                      >
+                      {{ property.name.replace('has', '') }}
                     </mat-chip-option>
                   </mat-chip-listbox>
 
@@ -115,7 +117,10 @@
                 <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;">
                   <h3> Instances of {{ this.getRangeName(className) }} and subclases </h3>
                   <mat-selection-list (selectionChange)="onSelectionChange($event)">
-                    <mat-list-option *ngFor="let instance of getIntances(); trackBy: track" color="primary" [value]="instance.name">
+                    <mat-list-option *ngFor="let instance of getIntances(); trackBy: track"
+                                      color="primary"
+                                      [value]="instance.name"
+                                      [selected]="selectedInstances.includes(instance.name)">
                         <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
                         <span matListItemLine>
                           {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
@@ -141,10 +146,10 @@
 
 </div>
 
-<div class="row">
-  <div class="col">
+<!-- <div class="row"> -->
+  <!-- <div class="col"> -->
 
-      <span>Valid</span>
+      <!-- <span>Valid</span>
       <pre>{{ formTestOntology.valid | json }}</pre>
 
       <span>Pristine</span>
@@ -153,14 +158,11 @@
       <span>Touched</span>
       <pre>{{ formTestOntology.touched| json }}</pre>
 
-      <!-- <span>Value</span>
-      <pre>{{ formOntology.value| json }}</pre> -->
-
       <span>FormTest Value</span>
-      <pre>{{ formTestOntology.value | json }}</pre>
+      <pre>{{ formTestOntology.value | json }}</pre> -->
 
-      <span>FormTest- label Erros</span>
-      <pre>{{ formTestOntology.controls['labelName'].errors| json }}</pre>
+      <!-- <span>FormTest- label Erros</span>
+      <pre>{{ formTestOntology.controls['labelName'].errors| json }}</pre> -->
 
       <!-- <span>FormTest Value</span>
       <pre>{{ formTestOntology.controls | json }}</pre> -->
@@ -176,12 +178,12 @@
 
       <!-- <span>Data Properties - Errors</span>
       <pre>{{ formOntology.controls['dataProperties'].errors | json }}</pre> -->
-      <span>Data Properties - Errors</span>
+      <!-- <span>Data Properties - Errors</span>
       <pre>
         <ng-container *ngFor="let control of dataPropertiesFormArray.controls">
           {{ control.errors | json }}
         </ng-container>
-      </pre>
+      </pre> -->
 
-  </div>
-</div>
+  <!-- </div> -->
+<!-- </div> -->
