@@ -3,11 +3,10 @@ import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators
 import { MatSelectionListChange } from '@angular/material/list';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
-import { Class } from '../../interface/classes.interface';
 import { CreateService } from './../../service/create.service';
-import { ObjectProperty } from '../../interface/object-properties.interface';
-import { DataPropertyTest, Restriction, SelectedOption } from './../../interface/data-ontology.interface';
-import { Intance, RestrictionCardinality } from '../../interface/data-ontology.interface';
+import { Class, DataPropertyForm, DataProperty, InformationForm, Restriction, SelectedOption } from './../../interface/data-ontology.interface';
+import { ObjectProperty, Intance, RestrictionCardinality } from '../../interface/data-ontology.interface';
+import { ResponseError } from '../../interface/errors-interface';
 
 
 @Component({
@@ -32,10 +31,13 @@ export class CreateComponent implements OnInit {
   }
 
   private loadClasses(): void {
-    this.createService.getClasses().subscribe(classes => {
-      this.classes = classes;
-      this.loadDataPropertiesTest();
-      // this.loadObjectProperties()
+    this.createService.getClasses().subscribe(response => {
+      if ('status' in response) {
+        console.error(response.error);
+        return;
+      }
+      this.classes = response;
+      this.loadDataProperties();
     });
   }
 
@@ -48,26 +50,36 @@ export class CreateComponent implements OnInit {
     return classData ? classData.comment : '';
   }
 
-  public dataPropertiesTest: DataPropertyTest[] = [];
-  private loadDataPropertiesTest(): void {
-    this.createService.getDataPropertiesTest().subscribe(dataProperties => {
+  public dataPropertiesTest: DataProperty[] = [];
+  private loadDataProperties(): void {
+    this.createService.getDataProperties().subscribe(dataProperties => {
       this.dataPropertiesTest = dataProperties;
     });
   }
 
-  public getRangeName(className: string): string {
+  private getRangeName(): string {
     if (this.selectedChipIndex != null) {
       const foundPredicate = this.objectProperies[this.selectedChipIndex].rangeName;
-      return foundPredicate ? foundPredicate : 'Not found Predicate?';
+      return foundPredicate ? foundPredicate : 'Not found Predicate';
     }
-    return 'Not found rangeName?';
+    return 'Not found rangeName';
+  }
+
+  public titleInstances(): string {
+    const range = this.getRangeName();
+    if (range === 'Not found rangeName')
+      return 'Not found rangeName';
+    return `Instances of ${range} and subclases`
   }
 
   public intances: Intance[] = [];
-  public loadIntances(rangeName: string): void {
-    this.createService.getIntances(rangeName).subscribe(instances => {
-      this.intances = instances;
-      // console.log('instances', instances);
+  private loadIntances(rangeName: string): void {
+    this.createService.getIntances(rangeName).subscribe((response: Intance[] | ResponseError) => {
+      if ('status' in response) {
+        console.error(response.error);
+        return;
+      }
+      this.intances = response;
     });
   }
 
@@ -84,26 +96,34 @@ export class CreateComponent implements OnInit {
     return instance ? instance.name : " "; // Ajusta esto según la estructura de tus instancias
   }
 
-  public getDataProperties(className: string): string[] {
+  private getDataProperties(className: string): string[] {
     const dataProperty = this.dataPropertiesTest.find(dataProperty => dataProperty.className === className);
     return dataProperty ? dataProperty.names : [];
   }
 
   public objectProperies: ObjectProperty[] = [];
-  private loadObjectPropertiesByClassName(className: string): Observable<ObjectProperty[]> {
+  private loadObjectPropertiesByClassName(className: string): Observable<ObjectProperty[] | ResponseError> {
     return this.createService.getObjectProperties(className).pipe(
-      tap(properties => {
-        this.objectProperies = properties;
+      tap((response: ObjectProperty[] | ResponseError) => {
+        if ('status' in response) {
+          console.error(response.error);
+          return;
+        }
+        this.objectProperies = response;
       }
     ));
   }
 
   public restrictionsDataProperties: RestrictionCardinality[] = [];
   private loadResctrictionsByDataProperty(className: string, dataProperty: string): void {
-    this.createService.getRestrictions(className, dataProperty).subscribe(restrictions => {
+    this.createService.getRestrictions(className, dataProperty).subscribe((response: Restriction[] | ResponseError) => {
+      if ('status' in response) {
+        console.error(response.error);
+        return;
+      }
       this.restrictionsDataProperties.push({
         dataPropertyName: dataProperty,
-        restrictions: restrictions
+        restrictions: response
       });
     });
   }
@@ -115,11 +135,11 @@ export class CreateComponent implements OnInit {
     });
   }
 
-  public getRestrictionsDataProperties() : RestrictionCardinality[] {
+  private getRestrictionsDataProperties() : RestrictionCardinality[] {
     return this.restrictionsDataProperties;
   }
 
-  public getObjectProperties(className: string): ObjectProperty[] {
+  public getObjectProperties(): ObjectProperty[] {
     return this.objectProperies;
   }
 
@@ -128,7 +148,7 @@ export class CreateComponent implements OnInit {
     this.restrictionsDataProperties = []; // Limpiar las restricciones de las propiedades de datos
     this.showObjectProperties = false; // Ocultar la lista de propiedades de datos
     this.selectedChipIndex = null; // Deseleccionar el chip seleccionado
-    this.formOntology.markAsUntouched(); // Marcar el formulario como no tocado
+    this.formTestOntology.markAsUntouched(); // Marcar el formulario como no tocado
   }
 
   public isLoading: boolean = false;
@@ -162,7 +182,7 @@ export class CreateComponent implements OnInit {
         this.hideLoadingBar();
       });
       this.intances = []; // Limpiar las instancias
-      this.formOntology.get('nameInstance')?.setValue(''); // Limpiar el campo de nombre de instancia
+      this.formTestOntology.get('nameInstance')?.setValue(''); // Limpiar el campo de nombre de instancia
     }
     this.clear();
     this.clearForm();
@@ -188,7 +208,7 @@ export class CreateComponent implements OnInit {
 
   // Función para mostrar u ocultar la lista de propiedades de datos
   public showObjectProperties: boolean = false; // Variable para controlar la visibilidad de la lista de checkboxes
-  public view_objectProperties() {
+  public viewObjectProperties() {
     this.showObjectProperties = !this.showObjectProperties; // Cambia el valor booleano cuando se hace clic en el botón
   }
 
@@ -218,14 +238,14 @@ export class CreateComponent implements OnInit {
 
       this.selectedChipIndex = index; // Seleccionar el chip si se hace clic en él
       this.initializeSelectedOptions(index);
-      const rangeName = this.getRangeName(selectedClassName);
+      const rangeName = this.getRangeName();
       if (rangeName !== 'Not found rangeName?' && rangeName !== 'Not found Predicate?') {
         this.loadIntances(rangeName);
       }
     }
   }
 
-  public initializeSelectedOptions(chipIndex: number): void {
+  private initializeSelectedOptions(chipIndex: number): void {
     const found = this.objectPropertiesSelected.find(option => option.objectPropertyName === this.objectProperies[chipIndex].name);
     if (found) {
       this.selectedInstances = found.instances;
@@ -234,7 +254,7 @@ export class CreateComponent implements OnInit {
     }
   }
 
-  public saveObjectPropertiesOptions(): void {
+  private saveObjectPropertiesOptions(): void {
     if (this.selectedChipIndex !== null && this.selectedInstances.length !== 0) {
       this.objectPropertiesSelected.push({
         objectPropertyName: this.objectProperies[this.selectedChipIndex].name,
@@ -255,12 +275,12 @@ export class CreateComponent implements OnInit {
     return this.selectedChipIndex === index;
   }
 
-  public formOntology: FormGroup = this.fb.group({
-    labelName: ['', [Validators.required,
-                        Validators.minLength(3),
-                        Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]],
-    dataProperties: this.fb.array([]),
-  });
+  // public formOntology: FormGroup = this.fb.group({
+  //   labelName: ['', [Validators.required,
+  //                       Validators.minLength(3),
+  //                       Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]],
+  //   dataProperties: this.fb.array([]),
+  // });
 
   public formTestOntology: FormGroup = this.fb.group({
     labelName: ['', [Validators.required,
@@ -268,7 +288,7 @@ export class CreateComponent implements OnInit {
       Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]]
   });
 
-  public clearForm(): void {
+  private clearForm(): void {
     this.formTestOntology.reset();
     this.formTestOntology.addControl('labelName', this.fb.control('', [Validators.required,
       Validators.minLength(3),
@@ -282,7 +302,7 @@ export class CreateComponent implements OnInit {
     return formTestControls.some(controlName => controlName.includes(control + 'Array'));
   }
 
-  public createForm(): void {
+  private createForm(): void {
     const restrictionsDataProperties = this.getRestrictionsDataProperties();
 
     restrictionsDataProperties.forEach((data, index) => {
@@ -293,11 +313,11 @@ export class CreateComponent implements OnInit {
                                                       (restriction.typeName === 'maxQualifiedCardinality' && restriction.valueIRI != '1') ||
                                                       (restriction.typeName === 'minQualifiedCardinality' && restriction.valueIRI === '1'));
         if (findR) {
-          const validators = this.getValidatorsForDataProperty(data.dataPropertyName, data.restrictions);
+          const validators = this.getValidatorsForDataProperty(data.restrictions);
           this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
           this.formTestOntology.addControl(data.dataPropertyName + 'Array', this.fb.array([]));
         } else {
-          const validators = this.getValidatorsForDataProperty(data.dataPropertyName, data.restrictions);
+          const validators = this.getValidatorsForDataProperty(data.restrictions);
           this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
         }
       }
@@ -333,11 +353,9 @@ export class CreateComponent implements OnInit {
     return abstractControl instanceof FormArray;
   }
 
-  private getValidatorsForDataProperty(dataProperty: string, restrictions: Restriction[]): ValidatorFn[] {
+  private getValidatorsForDataProperty(restrictions: Restriction[]): ValidatorFn[] {
     const validators = [Validators.required];
 
-      // console.log('dataProperty', dataProperty);
-      // console.log('restrictions', restrictions);
       if (restrictions) {
         restrictions.forEach(restriction => {
 
@@ -350,7 +368,7 @@ export class CreateComponent implements OnInit {
             validators.push(Validators.maxLength(10));
             validators.push(Validators.minLength(1));
           } else if (restriction.valueIRI.includes('double')) {
-            validators.push(Validators.pattern('^-?([1-9]\d*)([\.,]\d+)?$')); // FIX: la exp está bien, pero muestra el error en el campo de texto
+            validators.push(Validators.pattern('^([1-9]\d*|0)([\.]\d+)?$')); // FIX: la exp está bien, pero muestra el error en el campo de texto
             validators.push(Validators.maxLength(10));
             validators.push(Validators.minLength(1));
           } else {
@@ -363,7 +381,7 @@ export class CreateComponent implements OnInit {
           }
         });
       }
-      // console.log('validators', validators);
+
       return validators;
   }
 
@@ -423,11 +441,6 @@ export class CreateComponent implements OnInit {
     return false;
   }
 
-  public addAdditionalDataProperty(index: number): void {
-    const control = this.dataPropertiesFormArray;
-    control.insert(index + 1, this.fb.control(''));
-  }
-
   public isValidField(field: string): boolean | null {
     return this.formTestOntology.controls[field].errors && this.formTestOntology.controls[field].touched;
   }
@@ -459,7 +472,7 @@ export class CreateComponent implements OnInit {
               return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
             } else if (patternError.requiredPattern === '^[0-9 ]*$') {
               return 'Invalid pattern. The field must contain only numbers.';
-            } else if (patternError.requiredPattern === '^-?([1-9]\d*)([\.,]\d+)?$') {  // FIX: la exp está bien, pero muestra el error en el campo de texto
+            } else if (patternError.requiredPattern === '^([1-9]\d*|0)([\.]\d+)?$') {  // FIX: la exp está bien, pero muestra el error en el campo de texto
               return 'Invalid pattern. The field must contain only numbers or decimal points and using dot as decimal separator.';
             } else {
               return 'Invalid pattern.';
@@ -493,7 +506,7 @@ export class CreateComponent implements OnInit {
             return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
           } else if (patternError.requiredPattern === '^[0-9 ]*$') {
             return 'Invalid pattern. The field must contain only numbers.';
-          } else if (patternError.requiredPattern === '^-?([1-9]\d*)([\.,]\d+)?$') {  // FIX: la exp está bien, pero muestra el error en el campo de texto
+          } else if (patternError.requiredPattern === '^([1-9]\d*|0)([\.]\d+)?$') {  // FIX: la exp está bien, pero muestra el error en el campo de texto
             return 'Invalid pattern. The field must contain only numbers or decimal points and using dot as decimal separator.';
           } else {
             return 'Invalid pattern.';
@@ -509,8 +522,55 @@ export class CreateComponent implements OnInit {
     return null;
   }
 
-  get dataPropertiesFormArray(): FormArray {
-    return this.formOntology.get('dataProperties') as FormArray;
+  public abbreviateInternName(className: string): string {
+    const abreviateClass = className.slice(0, 5) + '_';
+    const labelFormValid = this.formTestOntology.get('labelName')?.valid;
+    if (labelFormValid) {
+      const labelForm: string = this.formTestOntology.get('labelName')?.value;
+      const words: string[] = labelForm.split(' ');
+      const abbreviatedWords: string[] = words.map(word => word.slice(0, 4));
+      const abbreviatedLabel: string = abbreviatedWords.join('_');
+      return abreviateClass + abbreviatedLabel;
+    }
+    return abreviateClass + Math.random().toString(10);
+  }
+
+  public saveInformationOfForm(className: string): InformationForm | Error {
+    if (this.formTestOntology.invalid) {
+      this.formTestOntology.markAllAsTouched();
+      return new Error('The form is invalid');
+    }
+
+    const internName = this.abbreviateInternName(className);
+    const label = this.formTestOntology.get('labelName')?.value;
+    const dataPropertiesNames: string[] | undefined = this.dataPropertiesTest.find(dataProperty => dataProperty.className === className)?.names;
+    if (dataPropertiesNames) {
+      const dataProperties: DataPropertyForm[] = dataPropertiesNames.map(dataPropertyName => {
+        const formArray = this.formTestOntology.get(dataPropertyName + 'Array') as FormArray;
+        if (formArray) {
+          const values: string[] = formArray.controls.map(control => control.value);
+          return {
+            IRI: dataPropertyName,
+            valuesFormArray: values
+          };
+        } else {
+          return {
+            IRI: dataPropertyName,
+            valueForm: this.formTestOntology.get(dataPropertyName)?.value
+          };
+        }
+      });
+
+      const objectProperties: SelectedOption[] = this.objectPropertiesSelected;
+      return {
+        internName: internName,
+        label: label,
+        dataProperties: dataProperties,
+        objectProperties: objectProperties
+      }
+    }
+
+    return new Error('Error to save information of form');
   }
 
   public removeHas(name: string): string {
@@ -518,12 +578,37 @@ export class CreateComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.formOntology.invalid) {
-      this.formOntology.markAllAsTouched();
+    if (this.formTestOntology.invalid) {
+      this.formTestOntology.markAllAsTouched();
       return;
     }
 
-    console.log(this.formOntology.value);
+    if (this.activeForm === null)
+      return;
+
+    const informationForm: InformationForm | Error = this.saveInformationOfForm(this.activeForm);
+    if (informationForm instanceof Error) {
+      console.error(informationForm);
+      return;
+    }
+    console.log(informationForm);
+
+    this.createService.createInstance(informationForm, this.activeForm).subscribe(response => {
+      if (response.status === 201) {
+        const dataPropertiesNames: string[] | undefined = this.dataPropertiesTest.find(dataProperty => dataProperty.className === this.activeForm)?.names;
+        if (dataPropertiesNames != undefined) {
+          dataPropertiesNames.forEach(dataPropertyName => {
+            const formArray: FormArray = this.formTestOntology.get(dataPropertyName + 'Array') as FormArray;
+            if (formArray) {
+              formArray.clear();
+            }
+          });
+        }
+        this.formTestOntology.reset();
+      }
+      console.log(response);
+    });
+    console.log(this.formTestOntology.value);
   }
 
 }

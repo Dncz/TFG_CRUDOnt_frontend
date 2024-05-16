@@ -1,5 +1,9 @@
-import { DataPropertiesClass } from "./data-properties.interface";
-import { ObjectProperty } from "./object-properties.interface";
+export interface Class {
+  classURI: string;
+  className: string;
+  comment: string;
+  clasification: string;
+}
 
 export interface Restriction {
   typeIRI: string;
@@ -7,19 +11,7 @@ export interface Restriction {
   valueIRI: string;
 }
 
-export interface CreateInstance {
-  name: string;
-  description?: string;
-  objectProperties: ObjectProperty[];
-  dataProperties: DataPropertiesClass[];
-}
-
 export interface DataProperty {
-  name: string;
-  IRI: string;
-}
-
-export interface DataPropertyTest {
   className: string;
   IRIs: string[];
   names: string[];
@@ -28,6 +20,13 @@ export interface DataPropertyTest {
 export interface RestrictionCardinality {
   dataPropertyName: string;
   restrictions : Restriction[];
+}
+
+export interface ObjectProperty {
+  IRI: string;
+  name: string;
+  rangeIRI: string[];
+  rangeName: string;
 }
 
 export interface Intance {
@@ -40,4 +39,17 @@ export interface Intance {
 export interface SelectedOption {
   objectPropertyName: string;
   instances: string[];
+}
+
+export interface DataPropertyForm {
+  IRI: string,
+  valueForm?: string,
+  valuesFormArray?: string[],
+}
+
+export interface InformationForm {
+  internName: string,
+  label: string,
+  dataProperties: DataPropertyForm[],
+  objectProperties: SelectedOption[],
 }

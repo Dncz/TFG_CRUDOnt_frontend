@@ -1,10 +1,11 @@
-import { Intance, DataProperty, Restriction, DataPropertyTest } from './../interface/data-ontology.interface';
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment';
-import { Class } from '../interface/classes.interface';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, forkJoin, map } from 'rxjs';
-import { ObjectProperty } from '../interface/object-properties.interface';
+
+import { ObjectProperty, Class, Intance, Restriction, DataProperty, InformationForm } from './../interface/data-ontology.interface';
+import { ResponseError } from './../interface/errors-interface';
+import { ResponsePost } from './../interface/response-interface';
+
 
 @Injectable({
   providedIn: 'root'
@@ -26,29 +27,23 @@ export class CreateService {
     }));
   }
 
-  getclass(className: string): Observable<Class> {
-    return this.http.get<Class>(`${environment.apiUrl}/classes/${className}`);
-  }
-
-  // Funcion para obtener los datos de la API
-  getClasses(): Observable<Class[]> {
-    return this.http.get<Class[]>(`${environment.apiUrl}/classes`).pipe(
-      map(data => this.mapToClass(data))
+  getClasses(): Observable<Class[] | ResponseError> {
+    return this.http.get<Class[] | ResponseError>(`/api/classes`).pipe(
+      map(
+        (data: Class[] | ResponseError) => {
+          if ('status' in data) {
+            return {
+              error: data.error,
+              status: data.status
+            };
+          }
+          return this.mapToClass(data);
+        }
+      )
     );
   }
 
-  public getDataProperties(className: string): Observable<DataProperty[]> {
-    return this.http.get<DataProperty[]>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
-      map(data => {
-        return data.map(item => ({
-          name: item.name,
-          IRI: item.IRI
-        }));
-      })
-    );
-  }
-
-  public mapDataPropertiesTest(data: any): DataPropertyTest {
+  public mapDataProperties(data: any): DataProperty {
     return {
       className: data.className,
       IRIs: data.IRIs.split(/,\s*/),
@@ -56,19 +51,25 @@ export class CreateService {
     };
   }
 
-  public getDataPropertiesTest(): Observable<DataPropertyTest[]> {
-    const observables: Observable<DataPropertyTest>[] = [];
+  public getDataProperties(): Observable<DataProperty[]> {
+    const observables: Observable<DataProperty>[] = [];
     this._classNames.forEach(className => {
-      observables.push(this.http.get<DataPropertyTest>(`${environment.apiUrl}/dataProperties/${className}`).pipe(
-        map(data => this.mapDataPropertiesTest(data))
+      observables.push(this.http.get<DataProperty>(`/api/dataProperties/${className}`).pipe(
+        map(data => this.mapDataProperties(data))
       ));
     });
     return forkJoin(observables);
   }
 
-  public getObjectProperties(className: string): Observable<ObjectProperty[]> {
-    return this.http.get<ObjectProperty[]>(`${environment.apiUrl}/objectProperties/${className}`).pipe(
-      map(data => {
+  public getObjectProperties(className: string): Observable<ObjectProperty[] | ResponseError> {
+    return this.http.get<ObjectProperty[] | ResponseError>(`/api/objectProperties/${className}`).pipe(
+      map((data: ObjectProperty[] | ResponseError) => {
+        if ('status' in data) {
+          return {
+            error: data.error,
+            status: data.status
+          };
+        }
         return data.map(item => ({
           IRI : item.IRI,
           name: item.name,
@@ -79,9 +80,15 @@ export class CreateService {
     );
   }
 
-  public getIntances(rangeName: string): Observable<Intance[]> {
-    return this.http.get<Intance[]>(`${environment.apiUrl}/getIntances/${rangeName}`).pipe(
+  public getIntances(rangeName: string): Observable<Intance[] | ResponseError> {
+    return this.http.get<Intance[] | ResponseError>(`/api/getIntances/${rangeName}`).pipe(
       map(data => {
+        if ('status' in data) {
+          return {
+            error: data.error,
+            status: data.status
+          };
+        }
         return data.map(item => ({
           IRI: item.IRI,
           name: item.name,
@@ -91,9 +98,15 @@ export class CreateService {
       })    );
   }
 
-  public getRestrictions(className: string, dataPropertyName: string): Observable<Restriction[]> {
-    return this.http.get<Restriction[]>(`${environment.apiUrl}/restrictionDataProperty/${className}/${dataPropertyName}`).pipe(
+  public getRestrictions(className: string, dataPropertyName: string): Observable<Restriction[] | ResponseError> {
+    return this.http.get<Restriction[] | ResponseError>(`/api/restrictionDataProperty/${className}/${dataPropertyName}`).pipe(
       map(data => {
+        if ('status' in data) {
+          return {
+            error: data.error,
+            status: data.status
+          };
+        }
         return data.map(item => ({
           typeIRI: item.typeIRI,
           typeName: item.typeName,
@@ -101,6 +114,16 @@ export class CreateService {
         }));
       })
     );
+  }
 
+  public createInstance(InformationForm: InformationForm, className: string): Observable<ResponsePost> {
+    return this.http.post<ResponsePost>(`/api/createInstance/${className}`, InformationForm, {observe: 'response'}).pipe(
+      map((response: HttpResponse<ResponsePost>) => {
+        return {
+          message: response.body!.message,
+          status: response['status']
+        };
+      })
+    );
   }
 }

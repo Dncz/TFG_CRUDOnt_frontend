@@ -1,0 +1,8 @@
+<mat-chip-listbox aria-label="ObjectProperties Selection">
+  <mat-chip-option *ngFor="let property of getObjectProperties(); let i = index"
+                    [selected]="isSelected(i)"
+                    (click)="toggleSelection(i)"
+                    >
+    {{ property.name.replace('has', '') }}
+  </mat-chip-option>
+</mat-chip-listbox>

@@ -9,13 +9,15 @@ import { UpdateComponent } from './update/update.component';
 import { DeleteComponent } from './delete/delete.component';
 import { SharedModule } from '../shared/shared.module';
 import { MaterialModule } from '../material/material.module';
+import { ChipsComponent } from './create/components/chips/chips.component';
 
 
 @NgModule({
     declarations: [
         CreateComponent,
         UpdateComponent,
-        DeleteComponent
+        DeleteComponent,
+        ChipsComponent
     ],
     imports: [
         CommonModule,

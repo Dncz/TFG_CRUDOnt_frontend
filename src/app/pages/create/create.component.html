@@ -30,7 +30,6 @@
               <div class="input-group mb-1">
                 <label class="col-sm-3 col-form-label"> Label </label>
                 <div class="col-sm-9">
-                  <!-- TODO: validación de repetición del nombre -->
                   <input class="form-control" type="text" placeholder="Label name" formControlName="labelName">
                   <span *ngIf="isValidField('labelName')"
                     class="form-text text-danger">
@@ -44,7 +43,6 @@
                   <div class="input-group mb-1">
 
                     <label class="col-sm-3 col-form-label">
-                      <!-- {{ controlName.key.replace('has', '') }} -->
                       <ng-container *ngIf="controlName.key.includes('Array'); else notArray">Lista de {{ removeHas(controlName.key.replace('Array', '')) }}</ng-container>
                       <ng-template #notArray>{{ removeHas(controlName.key) }}</ng-template>
                     </label>
@@ -100,11 +98,11 @@
                 </ng-container>
               </div>
 
-                <button type="button" (click)="view_objectProperties()" class="btn square-button-data-property mb-6">Add Object Property +</button>
+                <button type="button" (click)="viewObjectProperties()" class="btn square-button-data-property mb-6">Add Object Property +</button>
                 <div *ngIf="showObjectProperties">
 
                   <mat-chip-listbox aria-label="ObjectProperties Selection">
-                    <mat-chip-option *ngFor="let property of getObjectProperties(className); let i = index"
+                    <mat-chip-option *ngFor="let property of getObjectProperties(); let i = index"
                                       [selected]="isSelected(i)"
                                       (click)="toggleSelection(i, className)"
                                       >
@@ -112,10 +110,13 @@
                     </mat-chip-option>
                   </mat-chip-listbox>
 
+                  <!-- <app-create-chips [objectProperiesChild]="objectProperies" [selectedInstancesChild]="selectedInstances"> </app-create-chips> -->
+
                 </div>
 
+                <!-- <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;" (chipIndex)="chipIndex($event)"> -->
                 <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;">
-                  <h3> Instances of {{ this.getRangeName(className) }} and subclases </h3>
+                  <h3> {{ this.titleInstances() }} </h3>
                   <mat-selection-list (selectionChange)="onSelectionChange($event)">
                     <mat-list-option *ngFor="let instance of getIntances(); trackBy: track"
                                       color="primary"
@@ -130,7 +131,7 @@
                 </div>
 
                 <div class="mb-3">
-                  <button type="submit"
+                  <button type="submit" (click)="saveInformationOfForm(className)"
                   class="btn float-end mat-success">Submit</button>
                 </div>
             </div>
@@ -146,10 +147,10 @@
 
 </div>
 
-<!-- <div class="row"> -->
-  <!-- <div class="col"> -->
+<div class="row">
+  <div class="col">
 
-      <!-- <span>Valid</span>
+      <span>Valid</span>
       <pre>{{ formTestOntology.valid | json }}</pre>
 
       <span>Pristine</span>
@@ -159,7 +160,7 @@
       <pre>{{ formTestOntology.touched| json }}</pre>
 
       <span>FormTest Value</span>
-      <pre>{{ formTestOntology.value | json }}</pre> -->
+      <pre>{{ formTestOntology.value | json }}</pre>
 
       <!-- <span>FormTest- label Erros</span>
       <pre>{{ formTestOntology.controls['labelName'].errors| json }}</pre> -->
@@ -185,5 +186,5 @@
         </ng-container>
       </pre> -->
 
-  <!-- </div> -->
-<!-- </div> -->
+  </div>
+</div>
