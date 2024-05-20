@@ -317,7 +317,9 @@ export class CreateComponent implements OnInit {
           this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
           this.formTestOntology.addControl(data.dataPropertyName + 'Array', this.fb.array([]));
         } else {
+          console.log('Restricciones: ', data.restrictions)
           const validators = this.getValidatorsForDataProperty(data.restrictions);
+          console.log('Validators: ', validators)
           this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
         }
       }
@@ -360,7 +362,7 @@ export class CreateComponent implements OnInit {
         restrictions.forEach(restriction => {
 
           if (restriction.valueIRI.includes('string')) {
-            validators.push(Validators.pattern('^[A-Z][A-Za-z0-9 ]*$'));
+            validators.push(Validators.pattern('^[A-Z][A-Za-z0-9., ]*$'));
             validators.push(Validators.minLength(3));
           } else
           if (restriction.valueIRI.includes('integer')) {
@@ -468,7 +470,7 @@ export class CreateComponent implements OnInit {
             return 'This field is required';
           case 'pattern':
             const patternError = errors['pattern'];
-            if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9 ]*$') {
+            if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9., ]*$') {
               return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
             } else if (patternError.requiredPattern === '^[0-9 ]*$') {
               return 'Invalid pattern. The field must contain only numbers.';
@@ -502,7 +504,8 @@ export class CreateComponent implements OnInit {
           return 'This field is required';
         case 'pattern':
           const patternError = errors['pattern'];
-          if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9 ]*$') {
+          console.log(patternError.requiredPattern)
+          if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9., ]*$') {
             return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
           } else if (patternError.requiredPattern === '^[0-9 ]*$') {
             return 'Invalid pattern. The field must contain only numbers.';
