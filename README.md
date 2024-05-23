@@ -1,6 +1,6 @@
-# AppOSDI Client
+# CRUDOnt Client
 
-Este repositorio contiene el cliente para la aplicación web AppOSDI, una interfaz que facilita la inserción y consulta de información en la ontología OSDI, utilizada para la evaluación económica de tecnologías sanitarias en el contexto de enfermedades raras.
+Este repositorio contiene el cliente para la aplicación web CRUDOnt, una interfaz que facilita la inserción y consulta de información en cualquier ontología.
 
 ## Requisitos Previos
 
@@ -13,13 +13,13 @@ Antes de instalar y ejecutar el cliente, asegúrate de tener instalados los sigu
 
 ## Instalación
 
-Sigue los pasos a continuación para instalar y configurar el cliente de AppOSDI:
+Sigue los pasos a continuación para instalar y configurar el cliente de CRUDOnt:
 
 1. **Clona el repositorio:**
 
    ```bash
-   git clone https://github.com/Dncz/TFG_AppOSDI_frontend.git
-   cd TFG_AppOSDI_frontend
+   git clone https://github.com/Dncz/TFG_CRUDOnt_frontend.git
+   cd TFG_CRUDOnt_frontend
     ```
 2. **Instalar las dependencias:**
 
