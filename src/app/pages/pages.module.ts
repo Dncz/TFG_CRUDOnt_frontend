@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatListModule } from '@angular/material/list';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { PagesRoutingModule } from './pages-routing.module';
 import { CreateComponent } from './create/create.component';
@@ -25,7 +26,7 @@ import { ChipsComponent } from './create/components/chips/chips.component';
         ReactiveFormsModule,
         SharedModule,
         MaterialModule,
-
+        ScrollingModule
     ]
 })
 export class PagesModule { }

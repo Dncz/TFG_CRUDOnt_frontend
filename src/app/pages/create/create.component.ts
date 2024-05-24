@@ -148,7 +148,7 @@ export class CreateComponent implements OnInit {
     this.restrictionsDataProperties = []; // Limpiar las restricciones de las propiedades de datos
     this.showObjectProperties = false; // Ocultar la lista de propiedades de datos
     this.selectedChipIndex = null; // Deseleccionar el chip seleccionado
-    this.formTestOntology.markAsUntouched(); // Marcar el formulario como no tocado
+    this.formOntology.markAsUntouched(); // Marcar el formulario como no tocado
   }
 
   public isLoading: boolean = false;
@@ -162,10 +162,10 @@ export class CreateComponent implements OnInit {
     if (this.activeForm === className) {
       this.showLoadingBar();
       this.clearForm();
-      // Eliminar todos los controles existentes en el formulario formTestOntology
-      const formTestControls = Object.keys(this.formTestOntology.controls);
+      // Eliminar todos los controles existentes en el formulario formOntology
+      const formTestControls = Object.keys(this.formOntology.controls);
       formTestControls.forEach(controlName => {
-        this.formTestOntology.removeControl(controlName);
+        this.formOntology.removeControl(controlName);
       });
       this.loadRestrictions(className);
       // Si el formulario está activo, obtener los predicados
@@ -182,7 +182,7 @@ export class CreateComponent implements OnInit {
         this.hideLoadingBar();
       });
       this.intances = []; // Limpiar las instancias
-      this.formTestOntology.get('nameInstance')?.setValue(''); // Limpiar el campo de nombre de instancia
+      this.formOntology.get('nameInstance')?.setValue(''); // Limpiar el campo de nombre de instancia
     }
     this.clear();
     this.clearForm();
@@ -275,30 +275,23 @@ export class CreateComponent implements OnInit {
     return this.selectedChipIndex === index;
   }
 
-  // public formOntology: FormGroup = this.fb.group({
-  //   labelName: ['', [Validators.required,
-  //                       Validators.minLength(3),
-  //                       Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]],
-  //   dataProperties: this.fb.array([]),
-  // });
-
-  public formTestOntology: FormGroup = this.fb.group({
+  public formOntology: FormGroup = this.fb.group({
     labelName: ['', [Validators.required,
       Validators.minLength(3),
       Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]]
   });
 
   private clearForm(): void {
-    this.formTestOntology.reset();
-    this.formTestOntology.addControl('labelName', this.fb.control('', [Validators.required,
+    this.formOntology.reset();
+    this.formOntology.addControl('labelName', this.fb.control('', [Validators.required,
       Validators.minLength(3),
       Validators.pattern('^[A-Z][A-Za-z0-9 ]*$')]));
   }
 
   public ifControlKeyIsConteinedInNameOfSomeControlOfFormArray(control: string): boolean {
-    // primero busca si el nombre del control contiene la palabra 'Array' en el formulario formTestOntology
-    // buscar en los nombres del formulario formTestOntology si contiene la palabra control + 'Array'
-    const formTestControls = Object.keys(this.formTestOntology.controls);
+    // primero busca si el nombre del control contiene la palabra 'Array' en el formulario formOntology
+    // buscar en los nombres del formulario formOntology si contiene la palabra control + 'Array'
+    const formTestControls = Object.keys(this.formOntology.controls);
     return formTestControls.some(controlName => controlName.includes(control + 'Array'));
   }
 
@@ -314,21 +307,21 @@ export class CreateComponent implements OnInit {
                                                       (restriction.typeName === 'minQualifiedCardinality' && restriction.valueIRI === '1'));
         if (findR) {
           const validators = this.getValidatorsForDataProperty(data.restrictions);
-          this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
-          this.formTestOntology.addControl(data.dataPropertyName + 'Array', this.fb.array([]));
+          this.formOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
+          this.formOntology.addControl(data.dataPropertyName + 'Array', this.fb.array([]));
         } else {
           console.log('Restricciones: ', data.restrictions)
           const validators = this.getValidatorsForDataProperty(data.restrictions);
           console.log('Validators: ', validators)
-          this.formTestOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
+          this.formOntology.addControl(data.dataPropertyName, this.fb.control('', validators));
         }
       }
     })
   }
 
   public onAddElementToFormArray(dataProperty: string): void {
-    const field = this.formTestOntology.get(dataProperty) as FormControl;
-    const formArray = this.formTestOntology.get(dataProperty+'Array') as FormArray;
+    const field = this.formOntology.get(dataProperty) as FormControl;
+    const formArray = this.formOntology.get(dataProperty+'Array') as FormArray;
 
     if (field.invalid) return;
     if (field.value === '' || field.value === null) return;
@@ -340,18 +333,18 @@ export class CreateComponent implements OnInit {
   }
 
   public onDelElementToFormArray(dataProperty: string, index: number): void {
-    const formArray = this.formTestOntology.get(dataProperty) as FormArray;
+    const formArray = this.formOntology.get(dataProperty) as FormArray;
     if (formArray)
       formArray.removeAt(index);
   }
 
-  public getFormArrayOfFormTestOntology(dataProperty: string): FormArray {
-    return this.formTestOntology.get(dataProperty) as FormArray;
+  public getFormArrayOfFormOntology(dataProperty: string): FormArray {
+    return this.formOntology.get(dataProperty) as FormArray;
   }
 
-  // ver si el campo es un formArray o no de FormTestOntology
+  // ver si el campo es un formArray o no de formOntology
   public isFormArrayControlOfFormOntology(control: string): boolean {
-    const abstractControl = this.formTestOntology.get(control);
+    const abstractControl = this.formOntology.get(control);
     return abstractControl instanceof FormArray;
   }
 
@@ -362,7 +355,7 @@ export class CreateComponent implements OnInit {
         restrictions.forEach(restriction => {
 
           if (restriction.valueIRI.includes('string')) {
-            validators.push(Validators.pattern('^[A-Z][A-Za-z0-9., ]*$'));
+            validators.push(Validators.pattern('^[A-Z][A-Za-z0-9 ]*$'));
             validators.push(Validators.minLength(3));
           } else
           if (restriction.valueIRI.includes('integer')) {
@@ -389,7 +382,7 @@ export class CreateComponent implements OnInit {
 
   public showPlusIconForDataPropertyTypeSomeValuesFrom(dataPropertyArray: string): boolean {
     const restrictions = this.restrictionsDataProperties.find(restriction => restriction.dataPropertyName === dataPropertyArray.replace('Array', ''))?.restrictions;
-    const formArray = this.formTestOntology.get(dataPropertyArray) as FormArray;
+    const formArray = this.formOntology.get(dataPropertyArray) as FormArray;
     if (restrictions) {
       let showButton = false;
       restrictions.forEach(restriction => {
@@ -444,20 +437,20 @@ export class CreateComponent implements OnInit {
   }
 
   public isValidField(field: string): boolean | null {
-    return this.formTestOntology.controls[field].errors && this.formTestOntology.controls[field].touched;
+    return this.formOntology.controls[field].errors && this.formOntology.controls[field].touched;
   }
 
   public isValidFieldInArray(formArray: FormArray, index: number) {
     return formArray.controls[index].errors && formArray.controls[index].touched;
   }
 
-  public isValidFieldInArrayOfFormTestOntology(dataProperty: string, index: number): boolean | null {
-    const formArray = this.formTestOntology.get(dataProperty) as FormArray;
+  public isValidFieldInArrayOfFormOntology(dataProperty: string, index: number): boolean | null {
+    const formArray = this.formOntology.get(dataProperty) as FormArray;
     return formArray.controls[index].errors && formArray.controls[index].touched;
   }
 
-  public getFieldErrorInArrayOfFormTestOntology(dataProperty: string, index: number): string | null {
-    const formArray = this.formTestOntology.get(dataProperty) as FormArray;
+  public getFieldErrorInArrayOfFormOntology(dataProperty: string, index: number): string | null {
+    const formArray = this.formOntology.get(dataProperty) as FormArray;
     if (!formArray.controls[index].errors) {
       return null;
     }
@@ -470,7 +463,7 @@ export class CreateComponent implements OnInit {
             return 'This field is required';
           case 'pattern':
             const patternError = errors['pattern'];
-            if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9., ]*$') {
+            if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9 ]*$') {
               return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
             } else if (patternError.requiredPattern === '^[0-9 ]*$') {
               return 'Invalid pattern. The field must contain only numbers.';
@@ -492,11 +485,11 @@ export class CreateComponent implements OnInit {
   }
 
   public getFieldError(field: string): string | null {
-    if (!this.formTestOntology.controls[field].errors) {
+    if (!this.formOntology.controls[field].errors) {
       return null;
     }
 
-    const errors = this.formTestOntology.controls[field].errors || {};
+    const errors = this.formOntology.controls[field].errors || {};
 
     for (const key of Object.keys(errors)) {
       switch (key) {
@@ -505,7 +498,7 @@ export class CreateComponent implements OnInit {
         case 'pattern':
           const patternError = errors['pattern'];
           console.log(patternError.requiredPattern)
-          if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9., ]*$') {
+          if (patternError.requiredPattern === '^[A-Z][A-Za-z0-9 ]*$') {
             return 'Invalid pattern. The field must contain only letters, numbers, or spaces. The first letter must be uppercase.';
           } else if (patternError.requiredPattern === '^[0-9 ]*$') {
             return 'Invalid pattern. The field must contain only numbers.';
@@ -527,9 +520,9 @@ export class CreateComponent implements OnInit {
 
   public abbreviateInternName(className: string): string {
     const abreviateClass = className.slice(0, 5) + '_';
-    const labelFormValid = this.formTestOntology.get('labelName')?.valid;
+    const labelFormValid = this.formOntology.get('labelName')?.valid;
     if (labelFormValid) {
-      const labelForm: string = this.formTestOntology.get('labelName')?.value;
+      const labelForm: string = this.formOntology.get('labelName')?.value;
       const words: string[] = labelForm.split(' ');
       const abbreviatedWords: string[] = words.map(word => word.slice(0, 4));
       const abbreviatedLabel: string = abbreviatedWords.join('_');
@@ -539,17 +532,17 @@ export class CreateComponent implements OnInit {
   }
 
   public saveInformationOfForm(className: string): InformationForm | Error {
-    if (this.formTestOntology.invalid) {
-      this.formTestOntology.markAllAsTouched();
+    if (this.formOntology.invalid) {
+      this.formOntology.markAllAsTouched();
       return new Error('The form is invalid');
     }
 
     const internName = this.abbreviateInternName(className);
-    const label = this.formTestOntology.get('labelName')?.value;
+    const label = this.formOntology.get('labelName')?.value;
     const dataPropertiesNames: string[] | undefined = this.dataPropertiesTest.find(dataProperty => dataProperty.className === className)?.names;
     if (dataPropertiesNames) {
       const dataProperties: DataPropertyForm[] = dataPropertiesNames.map(dataPropertyName => {
-        const formArray = this.formTestOntology.get(dataPropertyName + 'Array') as FormArray;
+        const formArray = this.formOntology.get(dataPropertyName + 'Array') as FormArray;
         if (formArray) {
           const values: string[] = formArray.controls.map(control => control.value);
           return {
@@ -559,7 +552,7 @@ export class CreateComponent implements OnInit {
         } else {
           return {
             IRI: dataPropertyName,
-            valueForm: this.formTestOntology.get(dataPropertyName)?.value
+            valueForm: this.formOntology.get(dataPropertyName)?.value
           };
         }
       });
@@ -581,8 +574,8 @@ export class CreateComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.formTestOntology.invalid) {
-      this.formTestOntology.markAllAsTouched();
+    if (this.formOntology.invalid) {
+      this.formOntology.markAllAsTouched();
       return;
     }
 
@@ -601,17 +594,17 @@ export class CreateComponent implements OnInit {
         const dataPropertiesNames: string[] | undefined = this.dataPropertiesTest.find(dataProperty => dataProperty.className === this.activeForm)?.names;
         if (dataPropertiesNames != undefined) {
           dataPropertiesNames.forEach(dataPropertyName => {
-            const formArray: FormArray = this.formTestOntology.get(dataPropertyName + 'Array') as FormArray;
+            const formArray: FormArray = this.formOntology.get(dataPropertyName + 'Array') as FormArray;
             if (formArray) {
               formArray.clear();
             }
           });
         }
-        this.formTestOntology.reset();
+        this.formOntology.reset();
       }
       console.log(response);
     });
-    console.log(this.formTestOntology.value);
+    console.log(this.formOntology.value);
   }
 
 }

@@ -3,12 +3,12 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'RaDiOW',
+    path: 'CRUDOnt',
     loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
   },
   {
     path: '**',
-    redirectTo: 'RaDiOW',
+    redirectTo: 'CRUDOnt',
   },
 ];
 

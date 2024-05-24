@@ -17,11 +17,8 @@
 
       <div class="mb-3" *ngFor="let className of getClassesName()">
         <div *ngIf="activeForm === className">
-
-          <form [formGroup]="formTestOntology" autocomplete="off" (ngSubmit)="onSubmit()">
-
+          <form [formGroup]="formOntology" autocomplete="off" (ngSubmit)="onSubmit()">
             <div class="container-fluid pb-3" *ngIf="!isLoading">
-
               <div class="alert alert-secondary" role="alert">
                 <h4 class="alert-heading"> {{ splitCamelCase(className) }} </h4>
                 <p> {{ getComment(className)}} </p>
@@ -38,7 +35,7 @@
                 </div>
               </div>
 
-              <div *ngFor="let controlName of formTestOntology.controls | keyvalue; let i = index" class="row mb-1">
+              <div *ngFor="let controlName of formOntology.controls | keyvalue; let i = index" class="row mb-1">
                 <ng-container *ngIf="controlName.key !== 'labelName'">
                   <div class="input-group mb-1">
 
@@ -68,7 +65,7 @@
 
                     <div class="col-sm-9" *ngIf="isFormArrayControlOfFormOntology(controlName.key)">
                       <div [formArrayName]="controlName.key">
-                        <div class="mb-1" *ngFor="let data of getFormArrayOfFormTestOntology(controlName.key).controls; let j = index">
+                        <div class="mb-1" *ngFor="let data of getFormArrayOfFormOntology(controlName.key).controls; let j = index">
 
                           <div class="input-group">
                             <input [formControlName]="j"
@@ -84,16 +81,14 @@
                             </div>
 
                           <div class="input-group">
-                            <span *ngIf="isValidFieldInArrayOfFormTestOntology(controlName.key, j)" class="form-text text-danger">
-                              {{ getFieldErrorInArrayOfFormTestOntology(controlName.key, j) }}
+                            <span *ngIf="isValidFieldInArrayOfFormOntology(controlName.key, j)" class="form-text text-danger">
+                              {{ getFieldErrorInArrayOfFormOntology(controlName.key, j) }}
                             </span>
                           </div>
 
                         </div>
-
                       </div>
                     </div>
-
                   </div>
                 </ng-container>
               </div>
@@ -110,39 +105,38 @@
                     </mat-chip-option>
                   </mat-chip-listbox>
 
-                  <!-- <app-create-chips [objectProperiesChild]="objectProperies" [selectedInstancesChild]="selectedInstances"> </app-create-chips> -->
-
                 </div>
 
-                <!-- <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;" (chipIndex)="chipIndex($event)"> -->
-                <div *ngIf="selectedChipIndex != null" style="margin-top: 20px;">
+                <div *ngIf="selectedChipIndex != null && showObjectProperties" style="margin-top: 20px;">
                   <h3> {{ this.titleInstances() }} </h3>
-                  <mat-selection-list (selectionChange)="onSelectionChange($event)">
-                    <mat-list-option *ngFor="let instance of getIntances(); trackBy: track"
-                                      color="primary"
-                                      [value]="instance.name"
-                                      [selected]="selectedInstances.includes(instance.name)">
-                        <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
-                        <span matListItemLine>
-                          {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
-                        </span>
-                    </mat-list-option>
-                  </mat-selection-list>
+                  <cdk-virtual-scroll-viewport class="block-list" itemSize="50">
+                    <mat-selection-list (selectionChange)="onSelectionChange($event)">
+                      <mat-list-option *cdkVirtualFor="let instance of getIntances()"
+                                        [value]="instance.name"
+                                        color="primary"
+                                        [selected]="selectedInstances.includes(instance.name)">
+                          <span matListItemTitle> {{ getPrincipalNameInstance(instance) }} </span>
+                          <span matListItemLine>
+                            {{ instance.description ? 'Description: ' + instance.description : 'No description' }}
+                          </span>
+                      </mat-list-option>
+                    </mat-selection-list>
+                  </cdk-virtual-scroll-viewport>
                 </div>
 
-                <div class="mb-3">
+                <div class="mt-3 text-end">
                   <button type="submit" (click)="saveInformationOfForm(className)"
-                  class="btn float-end mat-success">Submit</button>
+                  class="btn mat-success">
+                    Submit
+                  </button>
                 </div>
+
             </div>
-
-
           </form>
 
         </div>
       </div>
-
-        </div>
-      </div>
+    </div>
+  </div>
 
 </div>
